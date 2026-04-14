@@ -1,5 +1,7 @@
 # Storybook + AEM EDS
 
+<img width="981" height="360" alt="image" src="https://github.com/user-attachments/assets/c4129267-e8a1-4907-b96d-fb3c957ee499" />
+
 A local development environment for building and previewing [AEM Edge Delivery Services](https://www.aem.live/) blocks in isolation using [Storybook](https://storybook.js.org/).
 
 No React. No TypeScript. No build step. Just plain HTML, CSS, and vanilla JavaScript — the same stack EDS uses in production.
