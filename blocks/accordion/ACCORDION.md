@@ -22,14 +22,16 @@ This means:
 Create a table in your Word document. The first row is the block name; subsequent rows are content:
 
 ```
-┌─────────────────────────────┐
-│          Accordion          │  ← block name (first row)
-├──────────────┬──────────────┤
-│    Brand     │ Descriptions │  ← item 1: title | body
-├──────────────┼──────────────┤
-│    Brand     │ Descriptions │  ← item 2: title | body
-└──────────────┴──────────────┘
+┌──────────────────────────────────────────────────┐
+│                    Accordion                     │  ← block name (first row)
+├──────────────┬──────────────┬────────────────────┤
+│    Brand     │ Descriptions │      #e53e3e       │  ← title | body | color
+├──────────────┼──────────────┼────────────────────┤
+│    Brand     │ Descriptions │      #38a169       │  ← title | body | color
+└──────────────┴──────────────┴────────────────────┘
 ```
+
+The third column is optional. If omitted, the item falls back to the default color defined by `--accordion-color` in the CSS (`#555`).
 
 **Step 2 — EDS generates HTML**
 
@@ -40,15 +42,17 @@ EDS strips the block name row and wraps each content row in nested `<div>` eleme
   <div>
     <div>Brand</div>
     <div>Descriptions</div>
+    <div>#e53e3e</div>
   </div>
   <div>
     <div>Brand</div>
     <div>Descriptions</div>
+    <div>#38a169</div>
   </div>
 </div>
 ```
 
-Each outer `<div>` is a row; the two inner `<div>` elements map to the two columns (title and body).
+Each outer `<div>` is a row; the three inner `<div>` elements map to the three columns (title, body, color).
 
 **Step 3 — `decorate(block)` transforms the DOM**
 
@@ -106,7 +110,7 @@ export default function decorate(block) { ... }
 | Reads each Word table row | Iterates `block.children` |
 | Builds accessible triggers | `<button>` with `aria-expanded` + `aria-controls` |
 | Builds collapsible panels | `<div role="region">` with `hidden` attribute |
-| Applies per-item color | Reads `data-color` → sets `--accordion-color` CSS variable |
+| Applies per-item color | Reads third column's `textContent` → sets `--accordion-color` CSS variable |
 | Handles open/close | `click` listener toggles `aria-expanded` and `hidden` |
 
 ### `accordion.css`
@@ -174,30 +178,17 @@ No registration, no config file, no bundler needed.
 
 In your SharePoint or Google Drive document, insert a table:
 
-| Accordion | |
-|---|---|
-| Your title here | Your body content here |
-| Another title | Another body paragraph |
+| Accordion | | |
+|---|---|---|
+| Your title here | Your body content here | #e53e3e |
+| Another title | Another body paragraph | #38a169 |
 
 - Row 1 (`Accordion`) — the block name. EDS uses this to match the block.
-- Rows 2+ — each row becomes one accordion item. Left cell = title, right cell = body.
+- Rows 2+ — each row becomes one accordion item. Left cell = title, middle cell = body, right cell = color.
+- The color column accepts any valid CSS color value: hex (`#e53e3e`), named (`red`), `rgb()`, etc.
+- The color column is **optional** — omitting it falls back to the default `#555` defined in `accordion.css`.
 
-### 4. Optional: per-item color via block options
-
-EDS supports **block options** by adding text in parentheses after the block name, e.g. `Accordion (red)`. You can extend `accordion.js` to read `block.classList` for these options and map them to `--accordion-color` values:
-
-```js
-// Example extension inside decorate()
-const colorMap = { red: '#e53e3e', green: '#38a169', blue: '#3182ce' };
-const colorOption = [...block.classList].find((c) => colorMap[c]);
-if (colorOption) {
-  block.style.setProperty('--accordion-color', colorMap[colorOption]);
-}
-```
-
-Alternatively, the current implementation reads a `data-color` attribute on each row, which can be set programmatically or via EDS metadata.
-
-### 5. Preview and publish
+### 4. Preview and publish
 
 Use the standard EDS workflow:
 

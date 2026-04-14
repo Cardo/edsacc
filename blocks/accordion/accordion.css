@@ -1,24 +1,16 @@
-/* ==========================================================================
-   Accordion block — AEM EDS
-   ========================================================================== */
-
 .accordion.block {
   width: 100%;
   max-width: 640px;
   font-family: sans-serif;
 }
 
-/* ── Item ─────────────────────────────────────────────────────────────────── */
-
 .accordion-item {
-  --accordion-color: #555; /* default; overridden per-item via JS */
+  --accordion-color: #555;
   border: 2px solid var(--accordion-color);
   border-radius: 6px;
   margin-bottom: 8px;
   overflow: hidden;
 }
-
-/* ── Trigger ──────────────────────────────────────────────────────────────── */
 
 .accordion-trigger {
   display: flex;
@@ -40,29 +32,23 @@
   outline-offset: 2px;
 }
 
-/* ── Icon (CSS-only +/−) ──────────────────────────────────────────────────── */
-
 .accordion-icon::before {
-  content: '+';
+  content: "+";
   font-size: 20px;
   line-height: 1;
   transition: transform 0.2s ease;
   display: inline-block;
 }
 
-.accordion-trigger[aria-expanded='true'] .accordion-icon::before {
-  content: '−';
+.accordion-trigger[aria-expanded="true"] .accordion-icon::before {
+  content: "−";
 }
-
-/* ── Panel ────────────────────────────────────────────────────────────────── */
 
 .accordion-panel {
   background: #fff;
   border-top: 1px solid var(--accordion-color);
 }
 
-/* When hidden attribute is present the browser hides the element;
-   the animation runs on reveal via a max-height trick. */
 .accordion-panel:not([hidden]) {
   animation: accordion-open 0.2s ease forwards;
 }
