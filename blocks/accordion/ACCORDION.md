@@ -6,20 +6,11 @@ An AEM Edge Delivery Services (EDS) block that transforms a Word document table 
 
 ## How It Works
 
-### The EDS Block Model
-
-AEM EDS follows a **DOM-First** architecture. Content is authored in Microsoft Word (or Google Docs) as a table. EDS converts that table into a predictable HTML structure and then calls a `decorate(block)` function exported from the block's JavaScript file. The decorator's job is to take that raw HTML and progressively enhance it into a fully interactive component.
-
-This means:
-- **No build step** is needed to ship the component.
-- **Content lives in Word**, not in code.
-- **The decorator is the component** — it reads the DOM and rewrites it in place.
-
 ### Word Table → HTML → Decorated Component
 
 **Step 1 — Author in Word**
 
-Create a table in your Word document. The first row is the block name; subsequent rows are content:
+Create a table in the Word document. The first row is the block name; subsequent rows are content:
 
 ```
 ┌──────────────────────────────────────────────────┐
@@ -105,13 +96,13 @@ Exports a single default function — the EDS contract:
 export default function decorate(block) { ... }
 ```
 
-| What it does | How |
-|---|---|
-| Reads each Word table row | Iterates `block.children` |
-| Builds accessible triggers | `<button>` with `aria-expanded` + `aria-controls` |
-| Builds collapsible panels | `<div role="region">` with `hidden` attribute |
-| Applies per-item color | Reads third column's `textContent` → sets `--accordion-color` CSS variable |
-| Handles open/close | `click` listener toggles `aria-expanded` and `hidden` |
+| What it does               | How                                                                        |
+| -------------------------- | -------------------------------------------------------------------------- |
+| Reads each Word table row  | Iterates `block.children`                                                  |
+| Builds accessible triggers | `<button>` with `aria-expanded` + `aria-controls`                          |
+| Builds collapsible panels  | `<div role="region">` with `hidden` attribute                              |
+| Applies per-item color     | Reads third column's `textContent` → sets `--accordion-color` CSS variable |
+| Handles open/close         | `click` listener toggles `aria-expanded` and `hidden`                      |
 
 ### `accordion.css`
 
@@ -134,27 +125,14 @@ This means **what you see in Storybook is what you get in production** — there
 
 ---
 
-## Accessibility
-
-| Feature | Implementation |
-|---|---|
-| Keyboard navigation | Native `<button>` — Tab to focus, Space/Enter to toggle |
-| Screen reader state | `aria-expanded="true/false"` on the trigger |
-| Panel association | `aria-controls` (trigger → panel) and `aria-labelledby` (panel → trigger) |
-| Landmark region | `role="region"` on each panel |
-| Focus indicator | `focus-visible` outline on the trigger |
-| Icon hidden from AT | `aria-hidden="true"` on the `+/−` icon span |
-
----
-
 ## Exporting to AEM EDS
 
 ### 1. Copy the block files
 
-Copy the two runtime files into your EDS project repository under `blocks/accordion/`:
+Copy the two runtime files into the EDS project repository under `blocks/accordion/`:
 
 ```
-your-eds-project/
+sample-eds-project/
 └── blocks/
     └── accordion/
         ├── accordion.js   ← copy this
@@ -163,42 +141,19 @@ your-eds-project/
 
 > Do **not** copy `accordion.stories.js` — that file is only for local development.
 
-### 2. EDS auto-loads the block
+### 2. Author the content in Word
 
-EDS discovers and loads blocks by convention. As long as `accordion.js` and `accordion.css` are at `blocks/accordion/`, EDS will:
+In the SharePoint or Google Drive document, insert a table:
 
-1. Detect the `accordion` class on the block `<div>`.
-2. Dynamically `import('/blocks/accordion/accordion.js')`.
-3. Inject `<link rel="stylesheet" href="/blocks/accordion/accordion.css">`.
-4. Call `decorate(block)` on every matching element on the page.
-
-No registration, no config file, no bundler needed.
-
-### 3. Author the content in Word
-
-In your SharePoint or Google Drive document, insert a table:
-
-| Accordion | | |
-|---|---|---|
-| Your title here | Your body content here | #e53e3e |
-| Another title | Another body paragraph | #38a169 |
+| Accordion      |                        |         |
+| -------------- | ---------------------- | ------- |
+| The title here | The body content here  | #e53e3e |
+| Another title  | Another body paragraph | #38a169 |
 
 - Row 1 (`Accordion`) — the block name. EDS uses this to match the block.
 - Rows 2+ — each row becomes one accordion item. Left cell = title, middle cell = body, right cell = color.
 - The color column accepts any valid CSS color value: hex (`#e53e3e`), named (`red`), `rgb()`, etc.
 - The color column is **optional** — omitting it falls back to the default `#555` defined in `accordion.css`.
-
-### 4. Preview and publish
-
-Use the standard EDS workflow:
-
-```
-1. Edit document in Word / Google Docs
-2. Preview  → https://main--{repo}--{org}.hlx.page/{path}
-3. Publish  → https://main--{repo}--{org}.hlx.live/{path}
-```
-
-The block renders identically in preview and production because EDS serves the files directly from your GitHub repository — there is no build or deployment step.
 
 ---
 
@@ -213,10 +168,10 @@ npm run storybook
 
 Navigate to **Blocks > Accordion** in the sidebar. Three stories are available:
 
-| Story | Purpose |
-|---|---|
-| `Default` | Two items — red and green (matches the Word table design) |
-| `SingleItem` | Edge case with a single accordion item |
-| `ManyItems` | Four items with varied colors |
+| Story        | Purpose                                                   |
+| ------------ | --------------------------------------------------------- |
+| `Default`    | Two items — red and green (matches the Word table design) |
+| `SingleItem` | Edge case with a single accordion item                    |
+| `ManyItems`  | Four items with varied colors                             |
 
-To add a new story, add an export to `accordion.stories.js` and call `createAccordion()` with your desired items. The `decorate()` function runs live, so the story output is always in sync with the production code.
+To add a new story, add an export to `accordion.stories.js` and call `createAccordion()` with the desired items. The `decorate()` function runs live, so the story output is always in sync with the production code.
